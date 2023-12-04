@@ -102,19 +102,29 @@ ORDER BY Number_of_siblings;
 
 
 /* Table 3 */
-
-SELECT
-    instructor.instructor_ID AS Instructor_ID,
-    person.first_name AS First_name,
-    person.last_name AS Last_name,
-    instructor.amount_of_lessons AS Amount_of_lesson
+SELECT 
+    instructor.instructor_ID,
+    person.first_name,
+    person.last_name,
+    COUNT(*) AS lesson_count
 FROM 
-    instructor
-JOIN
-    person ON instructor.person_id = person.person_id;
-
-
-
+    (
+        SELECT instructor_ID, date FROM individual_lesson
+        UNION ALL
+        SELECT instructor_ID, date FROM group_lesson
+    ) AS lesson
+JOIN 
+    instructor ON lesson.instructor_ID = instructor.instructor_ID
+JOIN 
+    person ON instructor.person_id = person.person_id
+WHERE 
+    EXTRACT(MONTH FROM CAST(lesson.date AS DATE)) = 10 
+	AND EXTRACT(YEAR FROM CAST(lesson.date AS DATE)) = 2023
+	
+GROUP BY 
+    instructor.instructor_ID, person.first_name, person.last_name
+HAVING 
+    COUNT(*) > 3;
 
 
 
